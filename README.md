@@ -1,4 +1,4 @@
-﻿# PdfPrintCore
+﻿# ![](https://raw.githubusercontent.com/chengcunu/PdfPrintCore/main/documentation/logo64.png) PdfPrintCore
 
 A .NET core PDF printing library for printing PDF files to a printer in the background.
 
@@ -26,4 +26,4 @@ See the [Demo](source/PdfPrintCore.API.Demo) for more examples.
 
 ## License
 
-You can get a free license here  [license.xml](source/PdfPrintCore.API.Demo/PdfPrintCore.license.xml) # PdfPrintCore
+You can get a free license here  [license.xml](source/PdfPrintCore.API.Demo/PdfPrintCore.license.xml) 
