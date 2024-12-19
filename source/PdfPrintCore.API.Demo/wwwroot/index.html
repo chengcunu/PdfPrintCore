@@ -1,0 +1,213 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>PdfPrintCore API Demo</title>
+    <style>
+        th {
+            text-align: right;
+        }
+
+        .main {
+            margin-left: 10%;
+            margin-right: 10%;
+            margin-top: 20px;
+        }
+
+        .alert {
+            color: white;
+            padding: 4px;
+        }
+
+        .alert-info {
+            background-color: lightseagreen
+        }
+
+        .alert-error {
+            background-color: orangered
+        }
+    </style>
+    <link rel="icon" href="logo.ico">
+</head>
+<body>
+    <div class="main">
+        <div id="liveAlertPlaceholder"></div>
+        <h1>
+            PdfPrintCore API Demo
+        </h1>
+        <hr />
+        <table cellspacing="4" width="80%" align="center">
+            <tbody>
+                <tr>
+                    <th>Printer: </th>
+                    <td>
+                        <select id="printer" name="printer"></select>
+                        <a href="javascript:void(0)" onclick="getPrinterInfo();">Get printer info</a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Color Model: </th>
+                    <td>
+                        <select id="colorModel" name="colorModel">
+                            <option value="Default" selected>Default</option>
+                            <option value="GrayScale">GrayScale</option>
+                            <option value="Monochrome">Monochrome</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>RenderFormFil? </th>
+                    <td><input id="renderFormFill" name="renderFormFill" type="checkbox" value="true" /></td>
+                </tr>
+                <tr>
+                    <th>Pdf file: </th>
+                    <td><input id="pdfFile" name="pdfFile" type="file" accept="application/pdf" /></td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <td><input type="button" onclick="printDocument();" value="Print" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <hr />
+    </div>
+
+    <script type="text/javascript">
+        const printerInput = document.getElementById("printer");
+        const colorModelSelect = document.getElementById("colorModel");
+        const renderFormFillChk = document.getElementById("renderFormFill");
+        const pdfFile = document.getElementById("pdfFile");
+
+        const alertPlaceholder = document.getElementById("liveAlertPlaceholder")
+        const appendAlert = (message, type) => {
+            alertPlaceholder.innerHTML = [
+                `<div class="alert alert-${type}">`,
+                `   <div>${message}</div>`,
+                '</div>'
+            ].join('')
+        }
+
+        // List local printers
+        window.onload = function () {
+            printerInput.add(new Option("Select printer...", ""));
+            ajax({
+                url: "/list-printers",
+                success: function (res) {
+                    let json = JSON.parse(res);
+                    for (let i = 0, l = json.length; i < l; i++) {
+                        printerInput.add(new Option(json[i], json[i]));
+                    }
+                }
+            });
+        }
+
+        // Get the printer info
+        function getPrinterInfo() {
+            ajax({
+                url: "/get-printer-info?printer=" + printerInput.value,
+                success: function (res) {
+                    let json = JSON.parse(res);
+                    let state = `<h4>${printerInput.value} state: </h4>` +
+                        `<ul>` +
+                        `<li>Status: ${json.status}</li>` +
+                        `<li>StateMessage: ${json.stateMessage}</li>` +
+                        `<li>JobCountSinceLastReset: ${json.jobCountSinceLastReset}</li>` +
+                        `<li>Location: ${json.location}</li>` +
+                        `</ul>`;
+                    appendAlert(state, 'info');
+                }
+            });
+        }
+
+        // Print PDF document
+        function printDocument() {
+            if (pdfFile.files.length == 0) {
+                return appendAlert("The pdfFile is required", "error");
+            }
+
+            getBlob(pdfFile.files[0], function (blob) {
+                ajax({
+                    url: `/print?printer=${encodeURI(printerInput.value)}&colorModel=${colorModelSelect.value}&renderFormFill=${renderFormFillChk.checked}`,
+                    type: "POST",
+                    data: blob,
+                    beforeSend: function () { appendAlert("Printing...", "info"); },
+                    success: function (res) { appendAlert("Completed", "info");  },
+                    faile: function (res) { appendAlert(res, "error"); }
+                });
+            })
+
+            function getBlob(file, callback) {
+                const type = file.type;
+                const reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                reader.onload = function (e) {
+                    const blob = new Blob([e.target.result], { type });
+                    if (typeof callback === 'function') {
+                        callback(blob);
+                    } else {
+                        return blob;
+                    }
+                };
+            }
+        }
+
+        function ajax(options) {
+            var xhr = new XMLHttpRequest();
+
+            if (options.responseType) {
+                xhr.responseType = options.responseType;
+            }
+
+            var responseTextType = xhr.responseType == "" || xhr.responseType == "text";
+
+            if (options.type && options.type.toUpperCase() == "POST") {
+                xhr.open("POST", options.url, true);
+                if (options.contentType) {
+                    switch (options.contentType.toUpperCase()) {
+                        case "JSON":
+                            xhr.setRequestHeader("Content-Type", "application/json");
+                            break;
+                        case "TEXT":
+                            xhr.setRequestHeader("Content-Type", "text/plain");
+                            break;
+                        default:
+                            xhr.setRequestHeader("Content-Type", options.contentType);
+                            break;
+                    }
+                }
+            } else {
+                xhr.open("GET", options.url, true);
+            }
+
+            options.beforeSend && options.beforeSend(xhr);
+
+            xhr.send(options.data);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 3 && options.processing) {
+                    if (responseTextType && xhr.status == 200 && xhr.responseText) {
+                        options.processing(xhr.responseText);
+                    }
+                }
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200 || xhr.status == 204) {
+                        options.success && options.success(xhr.response);
+                    } else {
+                        if (responseTextType && xhr.responseText) {
+                            options.faile && options.faile(xhr.responseText);
+                        } else {
+                            options.faile && options.faile(xhr.status + ": Server internal error");
+                        }
+                    }
+                    options.complete && options.complete();
+                }
+            }
+
+            xhr.ontimeout = function (e) {
+                alert("Request timed out!");
+            };
+        }
+    </script>
+</body>
+</html>
+

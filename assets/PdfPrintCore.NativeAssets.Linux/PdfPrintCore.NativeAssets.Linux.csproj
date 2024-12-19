@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Import Project="..\..\source\PdfPrintCore.NuGet.targets"/>
+
+  <ItemGroup>
+	<None Include="..\..\lib\runtimes\linux-x64\native\*.*">
+		<Link>runtimes\linux-x64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\linux-x64\native\%(Filename)%(Extension)</PackagePath>
+	</None>
+	<None Include="..\..\lib\runtimes\linux-arm64\native\*.*">
+		<Link>runtimes\linux-arm64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\linux-arm64\native\%(Filename)%(Extension)</PackagePath>
+	</None>
+	<None Include="..\..\lib\runtimes\linux-musl-x64\native\*.*">
+		<Link>runtimes\linux-musl-x64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\linux-musl-x64\native\%(Filename)%(Extension)</PackagePath>
+	</None>
+	<None Include="..\..\lib\runtimes\linux-musl-arm64\native\*.*">
+		<Link>runtimes\linux-musl-arm64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <Pack>true</Pack>
+		  <Visible>false</Visible>
+		<PackagePath>runtimes\linux-musl-arm64\native\%(Filename)%(Extension)</PackagePath>
+	</None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <Import Project="..\PdfPrintCore.NuGet.targets"/>
+
+  <ItemGroup>
+	<None Include="..\..\lib\runtimes\win-x64\native\*.*">
+		<Link>runtimes\win-x64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\win-x64\native\%(FileName)%(Extension)</PackagePath>
+	</None>
+	  <None Include="..\..\lib\runtimes\win-arm64\native\*.*">
+		<Link>runtimes\win-arm64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\win-arm64\native\%(FileName)%(Extension)</PackagePath>
+	</None>
+	  <None Include="..\..\lib\runtimes\osx-x64\native\*.*">
+		<Link>runtimes\osx-x64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\osx-x64\native\%(FileName)%(Extension)</PackagePath>
+	</None>
+	  <None Include="..\..\lib\runtimes\osx-arm64\native\*.*">
+		<Link>runtimes\osx-arm64\native\%(FileName)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<Pack>true</Pack>
+		<Visible>false</Visible>
+		<PackagePath>runtimes\osx-arm64\native\%(FileName)%(Extension)</PackagePath>
+	</None>
+	</ItemGroup>
+</Project>
