@@ -14,7 +14,7 @@ internal static partial class NativeMethods
         LibraryResolver.EnsureRegistered();
     }
 
-    internal static IntPtr LoadNativeMethods()
+    internal static nint LoadNativeMethods()
     {
         string architecuter = RuntimeInformation.ProcessArchitecture switch
         {
