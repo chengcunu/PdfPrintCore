@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PdfPrintCore.Exceptions;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ public class PrintingService
     /// <param name="document">The pdf document of printing.</param>
     public PrintingService(PdfDocument document)
     {
+        ArgumentNullException.ThrowIfNull(document);
         _document = document;
     }
 
@@ -78,7 +80,7 @@ public class PrintingService
         }, cancellationToken);
     }
 
-    private PRINT_OPTIONS GetPrintOptions(ref nint ptr_cancelled)
+    internal PRINT_OPTIONS GetPrintOptions(ref nint ptr_cancelled)
     {
         RenderFlag flags = RenderFlag.None;
 
@@ -118,7 +120,7 @@ public class PrintingService
                 if (ptrRet != nint.Zero)
                 {
                     string errorMessage = Marshal.PtrToStringUni(ptrRet)!;
-                    throw new Exception(errorMessage);
+                    throw new NativeMethodException(errorMessage);
                 }
             }
             finally

@@ -6,7 +6,7 @@
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <Import Project="..\PdfPrintCore.NuGet.targets"/>
+  <Import Project="..\PdfPrintCore.NuGet.targets" />
 
   <ItemGroup>
 	<None Include="..\..\lib\runtimes\win-x64\native\*.*">
@@ -37,5 +37,11 @@
 		<Visible>false</Visible>
 		<PackagePath>runtimes\osx-arm64\native\%(FileName)%(Extension)</PackagePath>
 	</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>Tests</_Parameter1>
+		</AssemblyAttribute>
 	</ItemGroup>
 </Project>

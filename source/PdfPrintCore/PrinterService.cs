@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PdfPrintCore.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -19,8 +20,11 @@ public class PrinterService
 
         try
         {
-            string names = Marshal.PtrToStringUni(ptr)!;
-            string[] printers = names.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            string result = Marshal.PtrToStringUni(ptr)!;
+            if (result.StartsWith('/'))
+                throw new NativeMethodException(result);
+
+            string[] printers = result.Split('/', StringSplitOptions.RemoveEmptyEntries);
             return [.. printers];
         }
         finally

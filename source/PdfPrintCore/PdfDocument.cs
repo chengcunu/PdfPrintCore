@@ -42,6 +42,7 @@ public class PdfDocument : IDisposable
     /// <param name="password">PDF document password</param>
     public PdfDocument(string filename, string? password = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filename);
         _password = password;
 
         using FileStream fs = new(filename, FileMode.Open, FileAccess.Read);
