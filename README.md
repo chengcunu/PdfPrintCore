@@ -14,7 +14,7 @@ A .NET core PDF printing library for printing PDF files to a printer in the back
 ```
 nuget install PdfPrintCore
 ```
-Linux support nuget package: [PdfPrintCore.NativeAssets.Linux](https://www.nuget.org/packages/PdfPrintCore.NativeAssets.Linux) 
+Linux systems also require installation packages: [PdfPrintCore.NativeAssets.Linux](https://www.nuget.org/packages/PdfPrintCore.NativeAssets.Linux) 
 ## Example
 
 ``` c#
