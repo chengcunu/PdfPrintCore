@@ -1,4 +1,5 @@
 ﻿using PdfPrintCore;
+using PdfPrintCore.Exceptions;
 using System.Runtime.InteropServices;
 
 namespace Tests
@@ -13,6 +14,9 @@ namespace Tests
             _testPrinter = TestSettings.GetTestPrinter();
         }
 
+        /// <summary>
+        /// Test whether the default values of <see cref="PrintingService.GetPrintOptions(ref nint)"/> method are correct
+        /// </summary>
         [TestMethod]
         public void GetPrintOptions_DefaultValue_ShouldBeSuccessfully()
         {
@@ -32,6 +36,9 @@ namespace Tests
             Assert.IsNull(options.DrawingPageCallback);
         }
 
+        /// <summary>
+        /// Test whether the value of <see cref="PrintingService.GetPrintOptions(ref nint)"/>  method is correct
+        /// </summary>
         [TestMethod]
         public void GetPrintOptions_SetValue_ShouldBeSuccessfully()
         {
@@ -69,6 +76,9 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Test <see cref="PrintingService.Print(string?)"/> method.
+        /// </summary>
         [TestMethod]
         public void Print_ShouldBeSuccessfully()
         {
@@ -93,6 +103,58 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Test PDF printing with correct password. <see cref="PrintingService.Print(string?)"/>
+        /// </summary>
+        [TestMethod]
+        public void Print_CorrectPassword_ShouldBeSuccessfully()
+        {
+            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample-protected.pdf");
+            if (_testPrinter is not null)
+            {
+                int jobCount = GetJobCount();
+
+                using PdfDocument document = new(filename, "2345.~K*954");
+                PrintingService service = new(document);
+                service.Print(_testPrinter.Name);
+
+                int afterJobCount = GetJobCount();
+                if (_testPrinter.IsInvalid)
+                    Assert.AreEqual(jobCount + 1, afterJobCount);
+                else
+                    Assert.AreEqual(jobCount, afterJobCount);
+            }
+            else
+            {
+                Assert.Inconclusive("No specified test printer.");
+            }
+        }
+
+        /// <summary>
+        /// Test PDF printing with error password. <see cref="PrintingService.Print(string?)"/>
+        /// </summary>
+        [TestMethod]
+        public void Print_ErrorPassword_ShouldBeFailed()
+        {
+            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample-protected.pdf");
+            if (_testPrinter is not null)
+            {
+                using PdfDocument document = new(filename);
+                PrintingService service = new(document);
+                Assert.ThrowsException<NativeMethodException>(() =>
+                {
+                    service.Print(_testPrinter.Name);
+                });
+            }
+            else
+            {
+                Assert.Inconclusive("No specified test printer.");
+            }
+        }
+
+        /// <summary>
+        /// Test <see cref="PrintingService.PrintAsync(string?, CancellationToken)"/> method.
+        /// </summary>
         [TestMethod]
         public void PrintAsync_ShouldBeSuccessfully()
         {

@@ -6,6 +6,10 @@ namespace Tests
 
     public class TestSettings
     {
+        /// <summary>
+        /// Get the printer for testing purposes
+        /// </summary>
+        /// <returns></returns>
         public static Printer GetTestPrinter()
         {
             if (PlatformConfiguration.IsWindows)

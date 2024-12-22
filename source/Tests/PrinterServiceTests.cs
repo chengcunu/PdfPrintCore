@@ -12,6 +12,9 @@ namespace Tests
             _testPrinter = TestSettings.GetTestPrinter();
         }
 
+        /// <summary>
+        /// Test <see cref="PrinterService.ListPrinters"/>
+        /// </summary>
         [TestMethod]
         public void ListPrinters_ShouldBeSuccessfully()
         {
@@ -27,6 +30,9 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Test <see cref="PrinterService.GetPrinterInfo(string)"/>
+        /// </summary>
         [TestMethod]
         public void GetPrinterInfo_ShouldBeSuccessfully()
         {

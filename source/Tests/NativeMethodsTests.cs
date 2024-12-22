@@ -6,6 +6,9 @@ namespace Tests
     [TestClass]
     public class NativeMethodsTests
     {
+        /// <summary>
+        /// Test native library resolver <see cref="NativeMethods.LoadNativeMethods"/>
+        /// </summary>
         [TestMethod]
         public void LoadNativeMethods_ShouldBeSuccessfully()
         {
@@ -30,24 +33,16 @@ namespace Tests
 
             string libPath = Path.Combine(AppContext.BaseDirectory, "runtimes");
             if (PlatformConfiguration.IsWindows)
-            {
                 libPath = Path.Combine(libPath, $"win-{architecuter}", "native", "printcore.dll");
-            }
             else if (PlatformConfiguration.IsLinux)
-            {
                 if (PlatformConfiguration.IsGlibc)
                     libPath = Path.Combine(libPath, $"linux-{architecuter}", "native", "libprintcore.so");
                 else
                     libPath = Path.Combine(libPath, $"linux-{PlatformConfiguration.LinuxFlavor}-{architecuter}", "native", "libprintcore.so");
-            }
             else if (PlatformConfiguration.IsOsx)
-            {
                 libPath = Path.Combine(libPath, $"osx-{architecuter}", "native", "libprintcore.dylib");
-            }
             else
-            {
                 throw new NotSupportedException();
-            }
 
             return NativeLibrary.TryLoad(libPath, out lib);
         }
