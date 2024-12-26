@@ -12,7 +12,7 @@ builder.Configuration.SetBasePath(AppContext.BaseDirectory)
     .Build();
 
 bool runAsService = !(Debugger.IsAttached || args.Contains("--console"));
-string? url = builder.Configuration["Url"];
+string? url = null;
 
 builder.Services.ConfigureHttpJsonOptions(static options => {
     options.SerializerOptions.TypeInfoResolverChain.Add(DefaultJsonSerializerContext.Default);
@@ -21,6 +21,7 @@ builder.Services.ConfigureHttpJsonOptions(static options => {
 
 if (runAsService)
 {
+    url = builder.Configuration["Url"];
     string workingDir = Path.GetDirectoryName(Environment.ProcessPath)!;
     Directory.SetCurrentDirectory(workingDir);
 
@@ -32,8 +33,6 @@ if (runAsService)
 
 var app = builder.Build();
 app.MapEndpoints();
-app.UseDefaultFiles();
-app.UseStaticFiles();
 
 app.Run(url);
 

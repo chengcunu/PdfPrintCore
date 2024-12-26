@@ -27,7 +27,7 @@
             background-color: orangered
         }
     </style>
-    <link rel="icon" href="logo.ico">
+    <link rel="icon" href="data:image/ico;base64,aWNv">
 </head>
 <body>
     <div class="main">

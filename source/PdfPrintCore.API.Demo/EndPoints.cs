@@ -1,9 +1,18 @@
-﻿namespace PdfPrintCore.API.Demo;
+﻿using System.Text;
+
+namespace PdfPrintCore.API.Demo;
 
 public static class EndPoints
 {
     public static void MapEndpoints(this WebApplication app)
     {
+        app.MapGet("/", () =>
+        {
+            string filename = Path.Combine(AppContext.BaseDirectory, "index.html.txt");
+            using var reader = new StreamReader(filename);
+            return Results.Content(reader.ReadToEnd(), "text/html", Encoding.UTF8);
+        });
+
         app.MapGet("list-printers", List<string> () => PrinterService.ListPrinters());
 
         // GET {{HostAddress}}/get-printer-info?printer=Microsoft%20Print%20to%20PDF
