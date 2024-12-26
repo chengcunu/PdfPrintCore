@@ -20,15 +20,18 @@
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.6" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.0" />
     <PackageReference Include="MSTest" Version="3.6.3" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\assets\PdfPrintCore.NativeAssets.Linux\PdfPrintCore.NativeAssets.Linux.csproj" />
+    <ProjectReference Include="..\..\assets\PdfPrintCore.NativeAssets.macOS\PdfPrintCore.NativeAssets.macOS.csproj" />
+    <ProjectReference Include="..\..\assets\PdfPrintCore.NativeAssets.Win32\PdfPrintCore.NativeAssets.Win32.csproj" />
     <ProjectReference Include="..\..\source\PdfPrintCore\PdfPrintCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-	<None Update="Assets\**">
+	<None Update="TestData\**">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
   </ItemGroup>

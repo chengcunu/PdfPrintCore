@@ -6,42 +6,16 @@
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <Import Project="..\PdfPrintCore.NuGet.targets" />
-
-  <ItemGroup>
-	<None Include="..\..\lib\runtimes\win-x64\native\*.*">
-		<Link>runtimes\win-x64\native\%(FileName)%(Extension)</Link>
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		<Pack>true</Pack>
-		<Visible>false</Visible>
-		<PackagePath>runtimes\win-x64\native\%(FileName)%(Extension)</PackagePath>
-	</None>
-	  <None Include="..\..\lib\runtimes\win-arm64\native\*.*">
-		<Link>runtimes\win-arm64\native\%(FileName)%(Extension)</Link>
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		<Pack>true</Pack>
-		<Visible>false</Visible>
-		<PackagePath>runtimes\win-arm64\native\%(FileName)%(Extension)</PackagePath>
-	</None>
-	  <None Include="..\..\lib\runtimes\osx-x64\native\*.*">
-		<Link>runtimes\osx-x64\native\%(FileName)%(Extension)</Link>
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		<Pack>true</Pack>
-		<Visible>false</Visible>
-		<PackagePath>runtimes\osx-x64\native\%(FileName)%(Extension)</PackagePath>
-	</None>
-	  <None Include="..\..\lib\runtimes\osx-arm64\native\*.*">
-		<Link>runtimes\osx-arm64\native\%(FileName)%(Extension)</Link>
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		<Pack>true</Pack>
-		<Visible>false</Visible>
-		<PackagePath>runtimes\osx-arm64\native\%(FileName)%(Extension)</PackagePath>
-	</None>
-	</ItemGroup>
-
+  <Import Project="..\..\PdfPrintCore.NuGet.props" />
+	
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
 			<_Parameter1>Tests</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\..\assets\PdfPrintCore.NativeAssets.macOS\PdfPrintCore.NativeAssets.macOS.csproj" />
+	  <ProjectReference Include="..\..\assets\PdfPrintCore.NativeAssets.Win32\PdfPrintCore.NativeAssets.Win32.csproj" />
 	</ItemGroup>
 </Project>

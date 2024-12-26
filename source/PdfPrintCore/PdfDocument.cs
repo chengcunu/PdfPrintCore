@@ -17,7 +17,7 @@ public class PdfDocument : IDisposable
     /// <param name="password">PDF document password</param>
     public PdfDocument(byte[] buffer, string? password = null)
     {
-        _data = buffer;
+        _data = buffer??throw new ArgumentNullException(nameof(buffer));
         _password = password;
     }
 
@@ -28,6 +28,10 @@ public class PdfDocument : IDisposable
     /// <param name="password">PDF document password</param>
     public PdfDocument(Stream stream, string? password = null)
     {
+        ArgumentNullException.ThrowIfNull(stream);
+        if (!stream.CanRead)
+            throw new ArgumentException("Can not read stream.");
+
         _data = new byte[stream.Length];
         _password = password;
 

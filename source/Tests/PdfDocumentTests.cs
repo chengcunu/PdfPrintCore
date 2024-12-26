@@ -10,7 +10,7 @@ namespace Tests
 
         public PdfDocumentTests()
         {
-            _filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample.pdf");
+            _filename = Path.Combine(AppContext.BaseDirectory, "TestData", "Sample.pdf");
             using FileStream fs = new(_filename, FileMode.Open, FileAccess.Read);
             _fileLength = (int)fs.Length;
         }
