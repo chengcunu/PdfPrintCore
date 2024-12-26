@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfPrintCore.NativeAssets.L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{F0887C84-4332-04D5-9A34-46F7875CB203}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfPrintCore.NativeAssets.macOS", "..\assets\PdfPrintCore.NativeAssets.macOS\PdfPrintCore.NativeAssets.macOS.csproj", "{70760A3C-3394-4034-B7F0-A45FBA3D1E0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfPrintCore.NativeAssets.Win32", "..\assets\PdfPrintCore.NativeAssets.Win32\PdfPrintCore.NativeAssets.Win32.csproj", "{016BE47F-D5A8-B9AF-14C9-C9A594F670A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,14 @@ Global
 		{F0887C84-4332-04D5-9A34-46F7875CB203}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0887C84-4332-04D5-9A34-46F7875CB203}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0887C84-4332-04D5-9A34-46F7875CB203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70760A3C-3394-4034-B7F0-A45FBA3D1E0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70760A3C-3394-4034-B7F0-A45FBA3D1E0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70760A3C-3394-4034-B7F0-A45FBA3D1E0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70760A3C-3394-4034-B7F0-A45FBA3D1E0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{016BE47F-D5A8-B9AF-14C9-C9A594F670A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{016BE47F-D5A8-B9AF-14C9-C9A594F670A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{016BE47F-D5A8-B9AF-14C9-C9A594F670A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{016BE47F-D5A8-B9AF-14C9-C9A594F670A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +58,8 @@ Global
 		{4E304EB8-81C0-4C2A-324C-E54F478125D1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{EA950FE4-E90D-6F53-8A88-7617C0DD1C5F} = {321620AB-4CE2-4016-8C48-62D25CFB7127}
 		{F0887C84-4332-04D5-9A34-46F7875CB203} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{70760A3C-3394-4034-B7F0-A45FBA3D1E0E} = {321620AB-4CE2-4016-8C48-62D25CFB7127}
+		{016BE47F-D5A8-B9AF-14C9-C9A594F670A4} = {321620AB-4CE2-4016-8C48-62D25CFB7127}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BCD44A42-0BD3-4962-A1DA-42671369CF10}

@@ -60,22 +60,34 @@ internal static partial class NativeMethods
     }
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial nint ListPrinters();
+    internal static partial nint PRN_ListPrinters();
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial nint GetPrinterInfo(nint printer);
+    internal static partial nint PRN_FreePrinters(nint printers);
+
+    [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nint PRN_GetPrinterInfo(nint printer);
+
+    [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nint PRN_FreePrinterInfo(nint info);
 
     [DllImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    internal static extern nint Print(nint buffer, int size, nint printer, nint password, PRINT_OPTIONS options);
+    internal static extern int PRN_Print(nint buffer, int size, nint printer, nint password, PRINT_OPTIONS options);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial int LoadLicense(nint filename);
+    internal static partial nint PRN_GetLastError();
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial int LoadLicenseXml(nint license);
+    internal static partial void PRN_FreeLastError(nint error);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    internal static partial int LoadLicenseBuffer(nint buffer, int size);
+    internal static partial int PRN_LoadLicense(nint filename);
+
+    [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int PRN_LoadLicenseXml(nint license);
+
+    [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int PRN_LoadLicenseBuffer(nint buffer, int size);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct PRINTER_INFO

@@ -16,7 +16,7 @@ public class PrinterService
     /// <returns></returns>
     public static List<string> ListPrinters()
     {
-        nint ptr = NativeMethods.ListPrinters();
+        nint ptr = NativeMethods.PRN_ListPrinters();
 
         try
         {
@@ -40,12 +40,15 @@ public class PrinterService
     /// <returns><see cref="PrinterInfo"/></returns>
     public static PrinterInfo GetPrinterInfo(string printer)
     {
+        if (printer is null)
+            return new PrinterInfo() { Status = PrinterStatus.Unknow };
+
         nint ptrInfo = IntPtr.Zero;
         nint ptrPrinter = Marshal.StringToHGlobalUni(printer);
 
         try
         {
-            ptrInfo = NativeMethods.GetPrinterInfo(ptrPrinter);
+            ptrInfo = NativeMethods.PRN_GetPrinterInfo(ptrPrinter);
             var info = Marshal.PtrToStructure<NativeMethods.PRINTER_INFO>(ptrInfo);
             return new PrinterInfo()
             {

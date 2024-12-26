@@ -8,10 +8,12 @@ namespace Tests
     public class PrintingServiceTests
     {
         private readonly Printer _testPrinter;
+        private readonly string _filePath;
 
         public PrintingServiceTests()
         {
             _testPrinter = TestSettings.GetTestPrinter();
+            _filePath = Path.Combine(AppContext.BaseDirectory, "TestData");
         }
 
         /// <summary>
@@ -20,7 +22,7 @@ namespace Tests
         [TestMethod]
         public void GetPrintOptions_DefaultValue_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample.pdf");
+            string filename = Path.Combine(_filePath, "Sample.pdf");
             using PdfDocument document = new(filename);
             PrintingService service = new(document);
 
@@ -42,7 +44,7 @@ namespace Tests
         [TestMethod]
         public void GetPrintOptions_SetValue_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample.pdf");
+            string filename = Path.Combine(_filePath, "Sample.pdf");
             using PdfDocument document = new(filename, "password");
             PrintingService service = new(document);
 
@@ -82,7 +84,7 @@ namespace Tests
         [TestMethod]
         public void Print_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample.pdf");
+            string filename = Path.Combine(_filePath, "Sample.pdf");
             if (_testPrinter is not null)
             {
                 int jobCount = GetJobCount();
@@ -109,7 +111,7 @@ namespace Tests
         [TestMethod]
         public void Print_CorrectPassword_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample-protected.pdf");
+            string filename = Path.Combine(_filePath, "Sample-protected.pdf");
             if (_testPrinter is not null)
             {
                 int jobCount = GetJobCount();
@@ -136,7 +138,7 @@ namespace Tests
         [TestMethod]
         public void Print_ErrorPassword_ShouldBeFailed()
         {
-            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "Sample-protected.pdf");
+            string filename = Path.Combine(_filePath, "Sample-protected.pdf");
             if (_testPrinter is not null)
             {
                 using PdfDocument document = new(filename);
@@ -158,7 +160,7 @@ namespace Tests
         [TestMethod]
         public void PrintAsync_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(AppContext.BaseDirectory, "Assets", "pdf-lib_form_creation_example.pdf");
+            string filename = Path.Combine(_filePath, "pdf-lib_form_creation_example.pdf");
             if (_testPrinter is not null)
             {
                 int jobCount = GetJobCount();

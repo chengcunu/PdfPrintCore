@@ -104,6 +104,9 @@ public class PrintingService
 
     private static void Print(string? printer, byte[] buffer, string? password, PRINT_OPTIONS printOptions)
     {
+        ArgumentNullException.ThrowIfNull(buffer);
+        ArgumentNullException.ThrowIfNull(printOptions);
+
         GCHandle handle = default;
         nint ptrPrinter = nint.Zero;
         nint ptrPassword = nint.Zero;
@@ -114,18 +117,19 @@ public class PrintingService
             ptrPrinter = Marshal.StringToHGlobalUni(printer);
             ptrPassword = Marshal.StringToHGlobalUni(password);
 
-            nint ptrRet = NativeMethods.Print(handle.AddrOfPinnedObject(), buffer.Length, ptrPrinter, ptrPassword, printOptions);
-            try
+            int result = PRN_Print(handle.AddrOfPinnedObject(), buffer.Length, ptrPrinter, ptrPassword, printOptions);
+            if (result != 0)
             {
-                if (ptrRet != nint.Zero)
+                nint error = PRN_GetLastError();
+                try
                 {
-                    string errorMessage = Marshal.PtrToStringUni(ptrRet)!;
+                    string errorMessage = Marshal.PtrToStringUni(error)!;
                     throw new NativeMethodException(errorMessage);
                 }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptrRet);
+                finally
+                {
+                    PRN_FreeLastError(error);
+                }
             }
         }
         finally

@@ -14,13 +14,15 @@ public class License
     /// <exception cref="FileNotFoundException"></exception>
     public static bool Load(string filename)
     {
+        ArgumentNullException.ThrowIfNull(filename);
+
         if (!File.Exists(filename))
             throw new FileNotFoundException(filename);
 
         nint ptr = Marshal.StringToHGlobalUni(filename);
         try
         {
-            int verified = NativeMethods.LoadLicense(ptr);
+            int verified = NativeMethods.PRN_LoadLicense(ptr);
             return verified == 0;
         }
         finally
@@ -46,7 +48,7 @@ public class License
         var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
         try
         {
-            int verified = NativeMethods.LoadLicenseBuffer(handle.AddrOfPinnedObject(), buffer.Length);
+            int verified = NativeMethods.PRN_LoadLicenseBuffer(handle.AddrOfPinnedObject(), buffer.Length);
             return verified == 0;
         }
         finally
@@ -67,7 +69,7 @@ public class License
         nint ptr = Marshal.StringToHGlobalUni(xml);
         try
         {
-            int verified = NativeMethods.LoadLicenseXml(ptr);
+            int verified = NativeMethods.PRN_LoadLicenseXml(ptr);
             return verified == 0;
         }
         finally

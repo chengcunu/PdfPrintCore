@@ -47,5 +47,13 @@ namespace Tests
                 Assert.Inconclusive("No specified test printer.");
             }
         }
+
+        [TestMethod]
+        public void GetPrinterInfo_ShouldBeFailed()
+        {
+            var info = PrinterService.GetPrinterInfo("/not exists printer");
+            Assert.IsNotNull(info);
+            Assert.AreEqual(PrinterStatus.Unknow, info.Status);
+        }
     }
 }
