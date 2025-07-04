@@ -37,7 +37,7 @@ app.MapEndpoints();
 app.Run(url);
 
 [JsonSerializable(typeof(List<string>))]
-[JsonSerializable(typeof(PrinterInfo))]
-[JsonSerializable(typeof(PrintSettings))]
+[JsonSerializable(typeof(Printer))]
+[JsonSerializable(typeof(PrintOptions))]
 [JsonSerializable(typeof(PrintTemplate))]
 internal partial class DefaultJsonSerializerContext : JsonSerializerContext { }

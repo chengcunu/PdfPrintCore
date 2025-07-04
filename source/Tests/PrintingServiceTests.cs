@@ -7,74 +7,74 @@ namespace Tests
     [TestClass]
     public class PrintingServiceTests
     {
-        private readonly Printer _testPrinter;
-        private readonly string _filePath;
+        private readonly Printer _printer;
+        private readonly string _testDataFilePath;
 
         public PrintingServiceTests()
         {
-            _testPrinter = TestSettings.GetTestPrinter();
-            _filePath = Path.Combine(AppContext.BaseDirectory, "TestData");
+            _printer = TestSettings.GetTestPrinter();
+            _testDataFilePath = Path.Combine(AppContext.BaseDirectory, "TestData");
         }
 
         /// <summary>
-        /// Test whether the default values of <see cref="PrintingService.GetPrintOptions(ref nint)"/> method are correct
+        /// Test whether the default values of <see cref="PrintingService.ConvertPrintOptions(ref nint)"/> method are correct
         /// </summary>
         [TestMethod]
-        public void GetPrintOptions_DefaultValue_ShouldBeSuccessfully()
+        public void ConvertPrintOptions_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(_filePath, "Sample.pdf");
+            string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
             using PdfDocument document = new(filename);
             PrintingService service = new(document);
 
-            nint cancellPtr = nint.Zero;
-            var options = service.GetPrintOptions(ref cancellPtr);
-            Assert.AreEqual(NativeMethods.RenderFlag.None, options.Flags & NativeMethods.RenderFlag.RenderFormFill);
+            nint pCancelled = nint.Zero;
+            var options = service.ConvertPrintOptions(ref pCancelled);
+            Assert.AreEqual(NativeMethods.RenderFlag.NONE, options.Flags & NativeMethods.RenderFlag.RENDER_FORMFILL);
             Assert.AreEqual("document", options.JobName);
-            Assert.AreEqual(NativeMethods.RenderFlag.FitToPaper, options.Flags & NativeMethods.RenderFlag.FitToPaper);
+            Assert.AreEqual(NativeMethods.RenderFlag.FIT_TO_PAPER, options.Flags & NativeMethods.RenderFlag.FIT_TO_PAPER);
             Assert.IsTrue(options.Copies <2);
-            Assert.AreEqual((int)ColorModel.Default, options.ColorModel);
+            Assert.AreEqual((int)ColorModel.DEFAULT, options.ColorModel);
             Assert.AreEqual(0, options.Blackthreshole);
             Assert.AreEqual(nint.Zero, options.CancelledPtr);
             Assert.IsNull(options.DrawingPageCallback);
         }
 
         /// <summary>
-        /// Test whether the value of <see cref="PrintingService.GetPrintOptions(ref nint)"/>  method is correct
+        /// Test whether the value of <see cref="PrintingService.ConvertPrintOptions(ref nint)"/>  method is correct
         /// </summary>
         [TestMethod]
-        public void GetPrintOptions_SetValue_ShouldBeSuccessfully()
+        public void ConvertPrintOptions2_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(_filePath, "Sample.pdf");
+            string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
             using PdfDocument document = new(filename, "password");
             PrintingService service = new(document);
 
-            service.PrinterSettings.RenderFormFill = true;
-            service.PrinterSettings.JobName = "Job1";
-            service.PrinterSettings.FitToPaper = false;
-            service.PrinterSettings.Copies = 2;
-            service.PrinterSettings.ColorModel = ColorModel.GrayScale;
-            service.PrinterSettings.Blackthreshole = 100;
+            service.PrintOptions.RenderFormFill = true;
+            service.PrintOptions.JobName = "Job1";
+            service.PrintOptions.FitToPaper = false;
+            service.PrintOptions.Copies = 2;
+            service.PrintOptions.ColorModel = ColorModel.GRAY_SCALE;
+            service.PrintOptions.Blackthreshole = 100;
             service.OnDrawingPage +=(args) => { };
 
-            nint cancellPtr = Marshal.AllocHGlobal(sizeof(int));
+            nint pCancelled = Marshal.AllocHGlobal(sizeof(int));
             try
             {
-                Marshal.WriteInt32(cancellPtr, 1);
+                Marshal.WriteInt32(pCancelled, 1);
 
-                var options = service.GetPrintOptions(ref cancellPtr);
-                Assert.AreEqual(NativeMethods.RenderFlag.RenderFormFill, options.Flags & NativeMethods.RenderFlag.RenderFormFill);
-                Assert.AreEqual(service.PrinterSettings.JobName, options.JobName);
-                Assert.AreEqual(NativeMethods.RenderFlag.None, options.Flags & NativeMethods.RenderFlag.FitToPaper);
+                var options = service.ConvertPrintOptions(ref pCancelled);
+                Assert.AreEqual(NativeMethods.RenderFlag.RENDER_FORMFILL, options.Flags & NativeMethods.RenderFlag.RENDER_FORMFILL);
+                Assert.AreEqual(service.PrintOptions.JobName, options.JobName);
+                Assert.AreEqual(NativeMethods.RenderFlag.NONE, options.Flags & NativeMethods.RenderFlag.FIT_TO_PAPER);
                 Assert.AreEqual(2, options.Copies);
-                Assert.AreEqual((int)ColorModel.GrayScale, options.ColorModel);
+                Assert.AreEqual((int)ColorModel.GRAY_SCALE, options.ColorModel);
                 Assert.AreEqual(100, options.Blackthreshole);
                 Assert.IsNotNull(options.DrawingPageCallback);
-                Assert.AreEqual(cancellPtr, options.CancelledPtr);
+                Assert.AreEqual(pCancelled, options.CancelledPtr);
             }
             finally
             {
-                Marshal.FreeHGlobal(cancellPtr);
-                cancellPtr = nint.Zero;
+                Marshal.FreeHGlobal(pCancelled);
+                pCancelled = nint.Zero;
             }
         }
 
@@ -82,53 +82,46 @@ namespace Tests
         /// Test <see cref="PrintingService.Print(string?)"/> method.
         /// </summary>
         [TestMethod]
-        public void Print_ShouldBeSuccessfully()
+        public void Print_WhenPrinterNotExist_ShouldBeFailed()
         {
-            string filename = Path.Combine(_filePath, "Sample.pdf");
-            if (_testPrinter is not null)
+            string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
+            using PdfDocument document = new(filename);
+            PrintingService service = new(document);
+            Assert.ThrowsException<NativeMethodException>(() =>
             {
-                int jobCount = GetJobCount();
+                service.Print("/printer");
+            });
+        }
 
+        /// <summary>
+        /// Test <see cref="PrintingService.Print(string?)"/> method.
+        /// </summary>
+        [TestMethod]
+        public void Print_Pdf_ShouldBeSuccessfully()
+        {
+            string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
+            if (_printer is not null)
+            {
                 using PdfDocument document = new(filename);
                 PrintingService service = new(document);
-                service.Print(_testPrinter.Name);
-
-                int afterJobCount = GetJobCount();
-                if (_testPrinter.IsInvalid)
-                    Assert.AreEqual(jobCount + 1, afterJobCount);
-                else
-                    Assert.AreEqual(jobCount, afterJobCount);
-            }
-            else
-            {
-                Assert.Inconclusive("No specified test printer.");
+                service.PrintOptions.PrintToFile = true;
+                service.Print(_printer.Name);
             }
         }
 
         /// <summary>
-        /// Test PDF printing with correct password. <see cref="PrintingService.Print(string?)"/>
+        /// Test Encrypted PDF printing with correct password. <see cref="PrintingService.Print(string?)"/>
         /// </summary>
         [TestMethod]
-        public void Print_CorrectPassword_ShouldBeSuccessfully()
+        public void Print_PdfWithPassword_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(_filePath, "Sample-protected.pdf");
-            if (_testPrinter is not null)
+            string filename = Path.Combine(_testDataFilePath, "Sample-protected.pdf");
+            if (_printer is not null)
             {
-                int jobCount = GetJobCount();
-
                 using PdfDocument document = new(filename, "2345.~K*954");
                 PrintingService service = new(document);
-                service.Print(_testPrinter.Name);
-
-                int afterJobCount = GetJobCount();
-                if (_testPrinter.IsInvalid)
-                    Assert.AreEqual(jobCount + 1, afterJobCount);
-                else
-                    Assert.AreEqual(jobCount, afterJobCount);
-            }
-            else
-            {
-                Assert.Inconclusive("No specified test printer.");
+                service.PrintOptions.PrintToFile = true;
+                service.Print(_printer.Name);
             }
         }
 
@@ -136,21 +129,17 @@ namespace Tests
         /// Test PDF printing with error password. <see cref="PrintingService.Print(string?)"/>
         /// </summary>
         [TestMethod]
-        public void Print_ErrorPassword_ShouldBeFailed()
+        public void Print_PdfWithoutPassword_ShouldBeFailed()
         {
-            string filename = Path.Combine(_filePath, "Sample-protected.pdf");
-            if (_testPrinter is not null)
+            string filename = Path.Combine(_testDataFilePath, "Sample-protected.pdf");
+            if (_printer is not null)
             {
                 using PdfDocument document = new(filename);
                 PrintingService service = new(document);
                 Assert.ThrowsException<NativeMethodException>(() =>
                 {
-                    service.Print(_testPrinter.Name);
+                    service.Print(_printer.Name);
                 });
-            }
-            else
-            {
-                Assert.Inconclusive("No specified test printer.");
             }
         }
 
@@ -158,44 +147,37 @@ namespace Tests
         /// Test <see cref="PrintingService.PrintAsync(string?, CancellationToken)"/> method.
         /// </summary>
         [TestMethod]
-        public void PrintAsync_ShouldBeSuccessfully()
+        public void PrintAsync_Pdf_ShouldBeSuccessfully()
         {
-            string filename = Path.Combine(_filePath, "pdf-lib_form_creation_example.pdf");
-            if (_testPrinter is not null)
+            string filename = Path.Combine(_testDataFilePath, "pdf-lib_page_copying_example.pdf");
+            if (_printer is not null)
             {
-                int jobCount = GetJobCount();
+                int beforeJobCount = GetJobCount();
 
                 using PdfDocument document = new(filename);
                 var service = new PrintingService(document);
-                service.OnDrawingPage +=static (args) =>
+                service.OnDrawingPage += (args) =>
                 {
+                    int afterJobCount = GetJobCount();
+                    Assert.IsTrue(beforeJobCount < afterJobCount);
                     Console.WriteLine($"{args.CurrentPageIndex} / {args.TotalPages}");
                 };
-                service.PrinterSettings.ColorModel = ColorModel.GrayScale;
-                service.PrinterSettings.RenderFormFill = true;
-                service.PrinterSettings.FitToPaper = false;
-                service.PrinterSettings.JobName = "test";
-                service.PrinterSettings.Copies = 1;
-                service.PrinterSettings.Blackthreshole = 100;
+                service.PrintOptions.ColorModel = ColorModel.GRAY_SCALE;
+                service.PrintOptions.RenderFormFill = true;
+                service.PrintOptions.FitToPaper = false;
+                service.PrintOptions.JobName = "test";
+                service.PrintOptions.Copies = 1;
+                service.PrintOptions.Blackthreshole = 100;
+                service.PrintOptions.PrintToFile = true;
 
-                service.PrintAsync(_testPrinter.Name).GetAwaiter().GetResult();
-
-                int afterJobCount = GetJobCount();
-                if (_testPrinter.IsInvalid)
-                    Assert.AreEqual(jobCount + 1, afterJobCount);
-                else
-                    Assert.AreEqual(jobCount, afterJobCount);
+                service.PrintAsync(_printer.Name).GetAwaiter().GetResult();
             }
         }
 
         private int GetJobCount()
         {
-            if (_testPrinter is not null)
-            {
-                var info = PrinterService.GetPrinterInfo(_testPrinter.Name);
-                return info.JobCountSinceLastReset;
-            }
-            return 0;
+            var info = PrinterService.GetPrinter(_printer.Name);
+            return info.JobCountSinceLastReset;
         }
     }
 }

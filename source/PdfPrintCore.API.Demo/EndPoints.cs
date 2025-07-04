@@ -13,10 +13,10 @@ public static class EndPoints
             return Results.Content(reader.ReadToEnd(), "text/html", Encoding.UTF8);
         });
 
-        app.MapGet("list-printers", List<string> () => PrinterService.ListPrinters());
+        app.MapGet("list-printers", List<string> () => PrinterService.ListInstalledPrinters());
 
         // GET {{HostAddress}}/get-printer-info?printer=Microsoft%20Print%20to%20PDF
-        app.MapGet("get-printer-info", PrinterInfo (string printer) => PrinterService.GetPrinterInfo(printer));
+        app.MapGet("get-printer-info", Printer (string printer) => PrinterService.GetPrinter(printer));
 
         // POST {{HostAddress}}/print?printer=Microsoft%20Print%20to%20PDF&color=&renderFormFill=
         // Content-Type: application/pdf
@@ -32,8 +32,8 @@ public static class EndPoints
             PrintingService service = new(document);
 
             service.OnDrawingPage +=(args) => { };
-            if (template.ColorModel is ColorModel color) service.PrinterSettings.ColorModel = color;
-            if (template.RenderFormFill is bool formFill) service.PrinterSettings.RenderFormFill = formFill;
+            if (template.ColorModel is ColorModel color) service.PrintOptions.ColorModel = color;
+            if (template.RenderFormFill is bool formFill) service.PrintOptions.RenderFormFill = formFill;
 
             await service.PrintAsync(template.Printer, cancellationToken);
             return Results.Ok();
@@ -49,8 +49,8 @@ public static class EndPoints
             using var document = new PdfDocument(buffer);
             PrintingService service = new(document);
 
-            if (template.ColorModel is ColorModel color) service.PrinterSettings.ColorModel = color;
-            if (template.RenderFormFill is bool formFill) service.PrinterSettings.RenderFormFill = formFill;
+            if (template.ColorModel is ColorModel color) service.PrintOptions.ColorModel = color;
+            if (template.RenderFormFill is bool formFill) service.PrintOptions.RenderFormFill = formFill;
 
             await service.PrintAsync(template.Printer, context.RequestAborted);
         });

@@ -1,7 +1,6 @@
-﻿using PdfPrintCore.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
+using System.Linq;
+using static PdfPrintCore.NativeMethods;
 
 namespace PdfPrintCore;
 
@@ -14,55 +13,46 @@ public class PrinterService
     /// Gets the names of all printers installed on the machine.
     /// </summary>
     /// <returns></returns>
-    public static List<string> ListPrinters()
+    public static List<string> ListInstalledPrinters()
     {
-        nint ptr = NativeMethods.PRN_ListPrinters();
+        var result = NativeMethods.ListInstalledPrinters();
+        return [.. result];
+    }
 
-        try
-        {
-            string result = Marshal.PtrToStringUni(ptr)!;
-            if (result.StartsWith('/'))
-                throw new NativeMethodException(result);
-
-            string[] printers = result.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            return [.. printers];
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
+    /// <summary>
+    /// Gets all printers installed on the machine.
+    /// </summary>
+    /// <returns></returns>
+    public static List<Printer> ListPrinters()
+    {
+        var result = NativeMethods.ListPrinters();
+        return result.Select(x => ConvertPrinter(x)).ToList();
     }
 
     /// <summary>
     /// Gets the printer info by name.
     /// </summary>
     /// <param name="printer">Printer name</param>
-    /// <returns><see cref="PrinterInfo"/></returns>
-    public static PrinterInfo GetPrinterInfo(string printer)
+    /// <returns><see cref="Printer"/></returns>
+    public static Printer GetPrinter(string printer)
     {
         if (printer is null)
-            return new PrinterInfo() { Status = PrinterStatus.Unknow };
+            return new Printer() { Status = PrinterStatus.UNKNOW };
 
-        nint ptrInfo = IntPtr.Zero;
-        nint ptrPrinter = Marshal.StringToHGlobalUni(printer);
+        var result = NativeMethods.GetPrinter(printer);
+        return ConvertPrinter(result);
+    }
 
-        try
+    private static Printer ConvertPrinter(PRN_PRINTER printer)
+    {
+        return new Printer()
         {
-            ptrInfo = NativeMethods.PRN_GetPrinterInfo(ptrPrinter);
-            var info = Marshal.PtrToStructure<NativeMethods.PRINTER_INFO>(ptrInfo);
-            return new PrinterInfo()
-            {
-                JobCountSinceLastReset = info.JobCountSinceLastReset,
-                Location = info.Location,
-                Status = (PrinterStatus)info.Status,
-                StateMessage = info.StateMessage
-            };
-        }
-        finally
-        {
-            Marshal.DestroyStructure<NativeMethods.PRINTER_INFO>(ptrInfo);
-            Marshal.FreeHGlobal(ptrInfo);
-            Marshal.FreeHGlobal(ptrPrinter);
-        }
+            Name = printer.Name,
+            IsDefault = printer.IsDefault,
+            JobCountSinceLastReset = printer.JobCountSinceLastReset,
+            Location = printer.Location,
+            Status = (PrinterStatus)printer.Status,
+            StateMessage = printer.StateMessage
+        };
     }
 }

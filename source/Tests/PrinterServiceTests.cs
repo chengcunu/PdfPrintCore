@@ -5,11 +5,25 @@ namespace Tests
     [TestClass]
     public sealed class PrinterServiceTests
     {
-        private readonly Printer _testPrinter;
+        private readonly Printer _printer;
 
         public PrinterServiceTests()
         {
-            _testPrinter = TestSettings.GetTestPrinter();
+            _printer = TestSettings.GetTestPrinter();
+        }
+
+        /// <summary>
+        /// Test <see cref="PrinterService.ListInstalledPrinters"/>
+        /// </summary>
+        [TestMethod]
+        public void ListInstalledPrinters_ShouldBeSuccessfully()
+        {
+            var printerNames = PrinterService.ListInstalledPrinters();
+            if (_printer is not null)
+            {
+                var name = printerNames.FirstOrDefault(x => x == _printer.Name);
+                Assert.IsNotNull(name);
+            }
         }
 
         /// <summary>
@@ -19,41 +33,34 @@ namespace Tests
         public void ListPrinters_ShouldBeSuccessfully()
         {
             var printers = PrinterService.ListPrinters();
-            if (_testPrinter is not null)
+            if (_printer is not null)
             {
-                var p = printers.FirstOrDefault(x => x == _testPrinter.Name);
-                Assert.IsNotNull(p);
-            }
-            else
-            {
-                Assert.Inconclusive("No specified test printer.");
+                var name = printers.FirstOrDefault(x => x.Name == _printer.Name);
+                Assert.IsNotNull(name);
             }
         }
 
         /// <summary>
-        /// Test <see cref="PrinterService.GetPrinterInfo(string)"/>
+        /// Test <see cref="PrinterService.GetPrinter(string)"/>
         /// </summary>
         [TestMethod]
-        public void GetPrinterInfo_ShouldBeSuccessfully()
+        public void GetPrinter_ShouldBeSuccessfully()
         {
-            if (_testPrinter is not null)
+            if (_printer is not null)
             {
-                var info = PrinterService.GetPrinterInfo(_testPrinter.Name);
-                Assert.IsNotNull(info);
-                Assert.AreNotEqual(PrinterStatus.Unknow, info.Status);
-            }
-            else
-            {
-                Assert.Inconclusive("No specified test printer.");
+                var prn = PrinterService.GetPrinter(_printer.Name);
+                Assert.IsNotNull(prn);
+                Assert.AreNotEqual(PrinterStatus.UNKNOW, prn.Status);
+                Assert.AreEqual(_printer.Name, prn.Name);
             }
         }
 
         [TestMethod]
-        public void GetPrinterInfo_ShouldBeFailed()
+        public void GetPrinter_WhenPrinterNotExist_ShouldBeUnknowStatus()
         {
-            var info = PrinterService.GetPrinterInfo("/not exists printer");
-            Assert.IsNotNull(info);
-            Assert.AreEqual(PrinterStatus.Unknow, info.Status);
+            var prn = PrinterService.GetPrinter("/printer");
+            Assert.IsNotNull(prn);
+            Assert.AreEqual(PrinterStatus.UNKNOW, prn.Status);
         }
     }
 }

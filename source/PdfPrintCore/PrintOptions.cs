@@ -3,7 +3,7 @@
 /// <summary>
 /// Information about how a document should be printed.
 /// </summary>
-public class PrintSettings
+public class PrintOptions
 {
     /// <summary>
     /// Sets the name to display to the user while printing the document; for example, in a print status dialog or a printer queue.
@@ -33,5 +33,7 @@ public class PrintSettings
     /// <summary>
     ///  Sets whether the output is in color
     /// </summary>
-    public ColorModel ColorModel { get; set; } = ColorModel.Default;
+    public ColorModel ColorModel { get; set; } = ColorModel.DEFAULT;
+
+    internal bool PrintToFile { get; set; }
 }

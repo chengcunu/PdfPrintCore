@@ -5,7 +5,7 @@
 /// </summary>
 public enum ColorModel
 {
-    Default = 0,
-    GrayScale = 1,
-    Monochrome = 2
+    DEFAULT = 0,
+    GRAY_SCALE = 1,
+    MONOCHROME = 2
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PdfPrintCore;
 
@@ -19,16 +19,10 @@ public class License
         if (!File.Exists(filename))
             throw new FileNotFoundException(filename);
 
-        nint ptr = Marshal.StringToHGlobalUni(filename);
-        try
-        {
-            int verified = NativeMethods.PRN_LoadLicense(ptr);
-            return verified == 0;
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
+        using FileStream fs = new(filename, FileMode.Open, FileAccess.Read);
+        using var reader = new StreamReader(fs, Encoding.UTF8);
+        string xml = reader.ReadToEnd();
+        return Load(xml);
     }
 
     /// <summary>
@@ -41,20 +35,9 @@ public class License
         if (!stream.CanRead)
             throw new ArgumentException("Can not read stream.");
 
-        byte[] buffer = new byte[stream.Length];
-        stream.Seek(0, SeekOrigin.Begin);
-        stream.ReadExactly(buffer);
-
-        var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-        try
-        {
-            int verified = NativeMethods.PRN_LoadLicenseBuffer(handle.AddrOfPinnedObject(), buffer.Length);
-            return verified == 0;
-        }
-        finally
-        {
-            handle.Free();
-        }
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        string xml = reader.ReadToEnd();
+        return Load(xml);
     }
 
     /// <summary>
@@ -65,16 +48,6 @@ public class License
     public static bool LoadXml(string xml)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(xml);
-
-        nint ptr = Marshal.StringToHGlobalUni(xml);
-        try
-        {
-            int verified = NativeMethods.PRN_LoadLicenseXml(ptr);
-            return verified == 0;
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
+        return NativeMethods.LoadLicense(xml);
     }
 }

@@ -1,5 +1,4 @@
-﻿using PdfPrintCore.Exceptions;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ namespace PdfPrintCore;
 public class PrintingService
 {
     private readonly PdfDocument _document;
-    private PrintSettings? _printSettings;
+    private PrintOptions? _printOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref='PrintingService'/> class.
@@ -28,10 +27,10 @@ public class PrintingService
     /// <summary>
     /// Gets or sets the printer on which the document is printed.
     /// </summary>
-    public PrintSettings PrinterSettings
+    public PrintOptions PrintOptions
     {
-        get => _printSettings??=new();
-        set => _printSettings = value;
+        get => _printOptions??=new();
+        set => _printOptions = value;
     }
 
     /// <summary>
@@ -46,8 +45,8 @@ public class PrintingService
     public void Print(string? printer)
     {
         nint zero = nint.Zero;
-        PRINT_OPTIONS options = GetPrintOptions(ref zero);
-        Print(printer, _document.Data, _document.Password, options);
+        PRINT_OPTIONS options = ConvertPrintOptions(ref zero);
+        NativeMethods.Print(printer, _document.Data, _document.Password, options);
     }
 
     /// <summary>
@@ -60,83 +59,43 @@ public class PrintingService
     {
         return Task.Run(() =>
         {
-            nint ptr_cancelled = Marshal.AllocHGlobal(sizeof(int));
+            nint pCancelled = Marshal.AllocHGlobal(sizeof(int));
 
             try
             {
-                PRINT_OPTIONS options = GetPrintOptions(ref ptr_cancelled);
+                PRINT_OPTIONS options = ConvertPrintOptions(ref pCancelled);
                 using var ctr = cancellationToken.Register(() =>
                 {
-                    Marshal.WriteInt32(ptr_cancelled, 1);
+                    Marshal.WriteInt32(pCancelled, 1);
                 });
 
-                Print(printer, _document.Data, _document.Password, options);
+                NativeMethods.Print(printer, _document.Data, _document.Password, options);
             }
             finally
             {
-                Marshal.FreeHGlobal(ptr_cancelled);
-                ptr_cancelled = nint.Zero;
+                Marshal.FreeHGlobal(pCancelled);
+                pCancelled = nint.Zero;
             }
         }, cancellationToken);
     }
 
-    internal PRINT_OPTIONS GetPrintOptions(ref nint ptr_cancelled)
+    internal PRINT_OPTIONS ConvertPrintOptions(ref nint pCancelled)
     {
-        RenderFlag flags = RenderFlag.None;
+        RenderFlag flags = RenderFlag.NONE;
 
-        if (this.PrinterSettings.FitToPaper)
-            flags |= RenderFlag.FitToPaper;
-
-        if (this.PrinterSettings.RenderFormFill)
-            flags |= RenderFlag.RenderFormFill;
+        if (PrintOptions.FitToPaper) flags |= RenderFlag.FIT_TO_PAPER;
+        if (PrintOptions.RenderFormFill) flags |= RenderFlag.RENDER_FORMFILL;
+        if (PrintOptions.PrintToFile) flags |= RenderFlag.PRINT_TO_FILE;
 
         return new PRINT_OPTIONS()
         {
-            JobName = !string.IsNullOrEmpty(this.PrinterSettings.JobName) ? this.PrinterSettings.JobName : "document",
-            Copies = this.PrinterSettings.Copies ?? 0,
-            ColorModel = (int)this.PrinterSettings.ColorModel,
-            Blackthreshole = this.PrinterSettings.Blackthreshole ?? 0,
+            JobName = !string.IsNullOrEmpty(PrintOptions.JobName) ? PrintOptions.JobName : "document",
+            Copies = PrintOptions.Copies ?? 0,
+            ColorModel = (int)PrintOptions.ColorModel,
+            Blackthreshole = PrintOptions.Blackthreshole ?? 0,
             Flags = flags,
             DrawingPageCallback = OnDrawingPage,
-            CancelledPtr = ptr_cancelled,
+            CancelledPtr = pCancelled,
         };
-    }
-
-    private static void Print(string? printer, byte[] buffer, string? password, PRINT_OPTIONS printOptions)
-    {
-        ArgumentNullException.ThrowIfNull(buffer);
-        ArgumentNullException.ThrowIfNull(printOptions);
-
-        GCHandle handle = default;
-        nint ptrPrinter = nint.Zero;
-        nint ptrPassword = nint.Zero;
-
-        try
-        {
-            handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            ptrPrinter = Marshal.StringToHGlobalUni(printer);
-            ptrPassword = Marshal.StringToHGlobalUni(password);
-
-            int result = PRN_Print(handle.AddrOfPinnedObject(), buffer.Length, ptrPrinter, ptrPassword, printOptions);
-            if (result != 0)
-            {
-                nint error = PRN_GetLastError();
-                try
-                {
-                    string errorMessage = Marshal.PtrToStringUni(error)!;
-                    throw new NativeMethodException(errorMessage);
-                }
-                finally
-                {
-                    PRN_FreeLastError(error);
-                }
-            }
-        }
-        finally
-        {
-            handle.Free();
-            Marshal.FreeHGlobal(ptrPassword);
-            Marshal.FreeHGlobal(ptrPrinter);
-        }
     }
 }

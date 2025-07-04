@@ -15,9 +15,8 @@ internal static class LibraryResolver
 
     private static nint DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
-        if (libraryName == NativeMethods.LibraryName)
+        if (libraryName == NativeMethods.LIBRARY_NAME)
             return NativeMethods.LoadNativeMethods();
-
         return nint.Zero;
     }
 
