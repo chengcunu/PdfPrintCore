@@ -222,7 +222,10 @@ internal static partial class NativeMethods
         public int Status { get; set; }
         public string? StateMessage { get; set; }
         public string? Location { get; set; }
+        public string? Comment { get; set; }
         public int JobCountSinceLastReset { get; set; }
+        public string? DriverName { get; set; }
+        public bool IsShared { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

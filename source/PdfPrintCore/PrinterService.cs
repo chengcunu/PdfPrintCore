@@ -51,8 +51,11 @@ public class PrinterService
             IsDefault = printer.IsDefault,
             JobCountSinceLastReset = printer.JobCountSinceLastReset,
             Location = printer.Location,
+            Comment = printer.Comment,
             Status = (PrinterStatus)printer.Status,
-            StateMessage = printer.StateMessage
+            StateMessage = printer.StateMessage,
+            DriverName = printer.DriverName,
+            IsShared = printer.IsShared,
         };
     }
 }

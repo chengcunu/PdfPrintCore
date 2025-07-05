@@ -15,9 +15,6 @@ public class PrintOptions
     /// </summary>
     public short? Copies { get; set; }
 
-    /// <summary>
-    /// Sets the threshole of black color model [-100, 100]
-    /// </summary>
     public short? Blackthreshole { get; set; }
 
     /// <summary>

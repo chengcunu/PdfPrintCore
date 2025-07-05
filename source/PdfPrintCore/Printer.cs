@@ -7,7 +7,10 @@ public class Printer
     public PrinterStatus Status { get; set; }
     public string? StateMessage { get; set; }
     public string? Location { get; set; }
+    public string? Comment { get; set; }
     public int JobCountSinceLastReset { get; set; }
+    public string? DriverName { get; set; }
+    public bool IsShared { get; set; }
 }
 
 public enum PrinterStatus
