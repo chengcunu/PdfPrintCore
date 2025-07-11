@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>PdfPrintCore API Demo</title>
+    <meta name="description" content="">
+    <title>Demo</title>
     <style>
-        th {
-            text-align: right;
+        body {
+            font-family: Verdana, sans-serif, Arial;
+            margin-left: 5%;
+            margin-right: 5%;
+            margin-top: 20px;
         }
 
-        .main {
-            margin-left: 10%;
-            margin-right: 10%;
-            margin-top: 20px;
+        th {
+            text-align: right;
         }
 
         .alert {
@@ -30,28 +32,29 @@
     <link rel="icon" href="data:image/ico;base64,aWNv">
 </head>
 <body>
-    <div class="main">
+    <div>
         <div id="liveAlertPlaceholder"></div>
         <h1>
-            PdfPrintCore API Demo
+            Print ServiceHost Demo
         </h1>
         <hr />
-        <table cellspacing="4" width="80%" align="center">
+        <table id="printersTable" name="printersTable" border="1" align="center"></table>
+        <table cellspacing="4" align="center">
             <tbody>
                 <tr>
                     <th>Printer: </th>
                     <td>
                         <select id="printer" name="printer"></select>
-                        <a href="javascript:void(0)" onclick="getPrinterInfo();">Get printer info</a>
+                        <a href="javascript:void(0)" onclick="getPrinter();">GetPrinter</a>
                     </td>
                 </tr>
                 <tr>
-                    <th>Color Model: </th>
+                    <th>ColorModel: </th>
                     <td>
                         <select id="colorModel" name="colorModel">
-                            <option value="Default" selected>Default</option>
-                            <option value="GrayScale">GrayScale</option>
-                            <option value="Monochrome">Monochrome</option>
+                            <option value="DEFAULT" selected>DEFAULT</option>
+                            <option value="GRAYSCALE">GRAYSCALE</option>
+                            <option value="MONOCHROME">MONOCHROME</option>
                         </select>
                     </td>
                 </tr>
@@ -65,7 +68,7 @@
                 </tr>
                 <tr>
                     <th></th>
-                    <td><input type="button" onclick="printDocument();" value="Print" /></td>
+                    <td><input type="button" onclick="printDoc();" style="font-size:18px;" value="Print Test" /></td>
                 </tr>
             </tbody>
         </table>
@@ -73,6 +76,7 @@
     </div>
 
     <script type="text/javascript">
+        const printersTable = document.getElementById("printersTable");
         const printerInput = document.getElementById("printer");
         const colorModelSelect = document.getElementById("colorModel");
         const renderFormFillChk = document.getElementById("renderFormFill");
@@ -91,7 +95,7 @@
         window.onload = function () {
             printerInput.add(new Option("Select printer...", ""));
             ajax({
-                url: "/list-printers",
+                url: "api/list-installed-printers",
                 success: function (res) {
                     let json = JSON.parse(res);
                     for (let i = 0, l = json.length; i < l; i++) {
@@ -99,35 +103,67 @@
                     }
                 }
             });
+            ajax({
+                url: "/api/list-printers",
+                success: function (res) {
+                    let json = JSON.parse(res);
+                    let html = [
+                        '<thead><tr>',
+                        '<td>Name</td>',
+                        '<td>IsDefault</td>',
+                        '<td>Status</td>',
+                        '<td>JobCount</td>',
+                        '<td>IsShared</td>',
+                        '<td>DriverName</td>',
+                        '<td>Location</td>',
+                        '<td>Comment</td>',
+                        '</tr></thead>',
+                    ].join('');
+                    for (let i = 0, l = json.length; i < l; i++) {
+                        html += [
+                            `<tbody><tr><td>${json[i].name}</td>`,
+                            `<td>${json[i].isDefault}</td>`,
+                            `<td>${json[i].status} - ${json[i].stateMessage}</td>`,
+                            `<td>${json[i].jobCountSinceLastReset}</td>`,
+                            `<td>${json[i].isShared}</td>`,
+                            `<td>${json[i].driverName}</td>`,
+                            `<td>${json[i].location}</td>`,
+                            `<td>${json[i].comment}</td></tr ></tbody>`
+                        ].join('');
+                    }
+                    printersTable.innerHTML = html;
+                }
+            });
         }
 
         // Get the printer info
-        function getPrinterInfo() {
+        function getPrinter() {
             ajax({
-                url: "/get-printer-info?printer=" + printerInput.value,
+                url: "/api/get-printer?printer=" + printerInput.value,
                 success: function (res) {
                     let json = JSON.parse(res);
-                    let state = `<h4>${printerInput.value} state: </h4>` +
-                        `<ul>` +
-                        `<li>Status: ${json.status}</li>` +
-                        `<li>StateMessage: ${json.stateMessage}</li>` +
-                        `<li>JobCountSinceLastReset: ${json.jobCountSinceLastReset}</li>` +
-                        `<li>Location: ${json.location}</li>` +
-                        `</ul>`;
+                    let state = "<ul>" +
+                        "<li>Name: " + json.name + "</li>" +
+                        "<li>IsDefault: " + json.isDefault + "</li>" +
+                        "<li>Status: " + json.status + " - " + json.stateMessage + "</li>" +
+                        "<li>JobCountSinceLastReset: " + json.jobCountSinceLastReset + "</li>" +
+                        "<li>Location: " + json.location + "</li>" +
+                        "<li>Comment: " + json.comment + "</li>" +
+                        "</ul>";
                     appendAlert(state, 'info');
                 }
             });
         }
 
-        // Print PDF document
-        function printDocument() {
+        // Print Doc
+        function printDoc() {
             if (pdfFile.files.length == 0) {
                 return appendAlert("The pdfFile is required", "error");
             }
 
-            getBlob(pdfFile.files[0], function (blob) {
+            print(pdfFile.files[0], function (blob) {
                 ajax({
-                    url: `/print?printer=${encodeURI(printerInput.value)}&colorModel=${colorModelSelect.value}&renderFormFill=${renderFormFillChk.checked}`,
+                    url: `/api/print?printer=${encodeURI(printerInput.value)}&colorModel=${colorModelSelect.value}&renderFormFill=${renderFormFillChk.checked}`,
                     type: "POST",
                     data: blob,
                     beforeSend: function () { appendAlert("Printing...", "info"); },
@@ -136,7 +172,7 @@
                 });
             })
 
-            function getBlob(file, callback) {
+            function print(file, callback) {
                 const type = file.type;
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(file);

@@ -17,17 +17,17 @@ namespace Tests
         }
 
         /// <summary>
-        /// Test whether the default values of <see cref="PrintingService.ConvertPrintOptions(ref nint)"/> method are correct
+        /// Test whether the default values of <see cref="PrintService.GetPrintOptions(ref nint)"/> method are correct
         /// </summary>
         [TestMethod]
         public void ConvertPrintOptions_ShouldBeSuccessfully()
         {
             string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
             using PdfDocument document = new(filename);
-            PrintingService service = new(document);
+            PrintService service = new(document);
 
             nint pCancelled = nint.Zero;
-            var options = service.ConvertPrintOptions(ref pCancelled);
+            var options = service.GetPrintOptions(ref pCancelled);
             Assert.AreEqual(NativeMethods.RenderFlag.NONE, options.Flags & NativeMethods.RenderFlag.RENDER_FORMFILL);
             Assert.AreEqual("document", options.JobName);
             Assert.AreEqual(NativeMethods.RenderFlag.FIT_TO_PAPER, options.Flags & NativeMethods.RenderFlag.FIT_TO_PAPER);
@@ -39,14 +39,14 @@ namespace Tests
         }
 
         /// <summary>
-        /// Test whether the value of <see cref="PrintingService.ConvertPrintOptions(ref nint)"/>  method is correct
+        /// Test whether the value of <see cref="PrintService.GetPrintOptions(ref nint)"/>  method is correct
         /// </summary>
         [TestMethod]
         public void ConvertPrintOptions2_ShouldBeSuccessfully()
         {
             string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
             using PdfDocument document = new(filename, "password");
-            PrintingService service = new(document);
+            PrintService service = new(document);
 
             service.PrintOptions.RenderFormFill = true;
             service.PrintOptions.JobName = "Job1";
@@ -61,7 +61,7 @@ namespace Tests
             {
                 Marshal.WriteInt32(pCancelled, 1);
 
-                var options = service.ConvertPrintOptions(ref pCancelled);
+                var options = service.GetPrintOptions(ref pCancelled);
                 Assert.AreEqual(NativeMethods.RenderFlag.RENDER_FORMFILL, options.Flags & NativeMethods.RenderFlag.RENDER_FORMFILL);
                 Assert.AreEqual(service.PrintOptions.JobName, options.JobName);
                 Assert.AreEqual(NativeMethods.RenderFlag.NONE, options.Flags & NativeMethods.RenderFlag.FIT_TO_PAPER);
@@ -79,14 +79,15 @@ namespace Tests
         }
 
         /// <summary>
-        /// Test <see cref="PrintingService.Print(string?)"/> method.
+        /// Test <see cref="PrintService.Print(string?)"/> method.
         /// </summary>
         [TestMethod]
         public void Print_WhenPrinterNotExist_ShouldBeFailed()
         {
             string filename = Path.Combine(_testDataFilePath, "Sample.pdf");
             using PdfDocument document = new(filename);
-            PrintingService service = new(document);
+            PrintService service = new(document);
+            service.PrintOptions.PrintToFile = true;
             Assert.ThrowsException<NativeMethodException>(() =>
             {
                 service.Print("/printer");
@@ -94,7 +95,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Test <see cref="PrintingService.Print(string?)"/> method.
+        /// Test <see cref="PrintService.Print(string?)"/> method.
         /// </summary>
         [TestMethod]
         public void Print_Pdf_ShouldBeSuccessfully()
@@ -103,14 +104,14 @@ namespace Tests
             if (_printer is not null)
             {
                 using PdfDocument document = new(filename);
-                PrintingService service = new(document);
+                PrintService service = new(document);
                 service.PrintOptions.PrintToFile = true;
                 service.Print(_printer.Name);
             }
         }
 
         /// <summary>
-        /// Test Encrypted PDF printing with correct password. <see cref="PrintingService.Print(string?)"/>
+        /// Test Encrypted PDF printing with correct password. <see cref="PrintService.Print(string?)"/>
         /// </summary>
         [TestMethod]
         public void Print_PdfWithPassword_ShouldBeSuccessfully()
@@ -119,14 +120,14 @@ namespace Tests
             if (_printer is not null)
             {
                 using PdfDocument document = new(filename, "2345.~K*954");
-                PrintingService service = new(document);
+                PrintService service = new(document);
                 service.PrintOptions.PrintToFile = true;
                 service.Print(_printer.Name);
             }
         }
 
         /// <summary>
-        /// Test PDF printing with error password. <see cref="PrintingService.Print(string?)"/>
+        /// Test PDF printing with error password. <see cref="PrintService.Print(string?)"/>
         /// </summary>
         [TestMethod]
         public void Print_PdfWithoutPassword_ShouldBeFailed()
@@ -135,7 +136,8 @@ namespace Tests
             if (_printer is not null)
             {
                 using PdfDocument document = new(filename);
-                PrintingService service = new(document);
+                PrintService service = new(document);
+                service.PrintOptions.PrintToFile = true;
                 Assert.ThrowsException<NativeMethodException>(() =>
                 {
                     service.Print(_printer.Name);
@@ -144,7 +146,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Test <see cref="PrintingService.PrintAsync(string?, CancellationToken)"/> method.
+        /// Test <see cref="PrintService.PrintAsync(string?, CancellationToken)"/> method.
         /// </summary>
         [TestMethod]
         public void PrintAsync_Pdf_ShouldBeSuccessfully()
@@ -155,7 +157,7 @@ namespace Tests
                 int beforeJobCount = GetJobCount();
 
                 using PdfDocument document = new(filename);
-                var service = new PrintingService(document);
+                var service = new PrintService(document);
                 service.OnDrawingPage += (args) =>
                 {
                     int afterJobCount = GetJobCount();

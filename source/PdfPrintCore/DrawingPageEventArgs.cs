@@ -3,7 +3,7 @@
 namespace PdfPrintCore;
 
 /// <summary>
-/// Provides data for the <see cref='PrintingService.OnDrawingPage'/> event.
+/// Provides data for the <see cref='PrintService.OnDrawingPage'/> event.
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct DrawingPageEventArgs

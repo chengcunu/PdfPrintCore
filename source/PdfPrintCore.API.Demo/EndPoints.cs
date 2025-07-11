@@ -4,32 +4,34 @@ namespace PdfPrintCore.API.Demo;
 
 public static class EndPoints
 {
-    public static void MapEndpoints(this WebApplication app)
+    public static void MapEndpoints(this IEndpointRouteBuilder routes)
     {
-        app.MapGet("/", () =>
+        routes.MapGet("/", () =>
         {
             string filename = Path.Combine(AppContext.BaseDirectory, "index.html.txt");
             using var reader = new StreamReader(filename);
             return Results.Content(reader.ReadToEnd(), "text/html", Encoding.UTF8);
         });
 
-        app.MapGet("list-printers", List<string> () => PrinterService.ListInstalledPrinters());
+        routes.MapGet("api/list-installed-printers", List<string> () => PrinterService.ListInstalledPrinters());
 
-        // GET {{HostAddress}}/get-printer-info?printer=Microsoft%20Print%20to%20PDF
-        app.MapGet("get-printer-info", Printer (string printer) => PrinterService.GetPrinter(printer));
+        routes.MapGet("api/list-printers", List<Printer> () => PrinterService.ListPrinters());
 
-        // POST {{HostAddress}}/print?printer=Microsoft%20Print%20to%20PDF&color=&renderFormFill=
+        // GET {{HostAddress}}/api/get-printer-info?printer=Microsoft%20Print%20to%20PDF
+        routes.MapGet("api/get-printer", Printer (string printer) => PrinterService.GetPrinter(printer));
+
+        // POST {{HostAddress}}/api/print?printer=Microsoft%20Print%20to%20PDF&color=&renderFormFill=
         // Content-Type: application/pdf
         // Content: Body stream
-        app.MapPost("print", static async ([AsParameters]PrintTemplate template, Stream body, ILoggerFactory loggerFactory, CancellationToken cancellationToken) =>
+        routes.MapPost("api/print", static async ([AsParameters]PrintFromTemplate template, Stream body, ILoggerFactory loggerFactory, CancellationToken cancellationToken) =>
         {
-            var logger = loggerFactory.CreateLogger("print");
-
+            var logger = loggerFactory.CreateLogger("api/print");
+            
             using var stream = new MemoryStream();
             await body.CopyToAsync(stream, cancellationToken);
 
             using var document = new PdfDocument(stream);
-            PrintingService service = new(document);
+            PrintService service = new(document);
 
             service.OnDrawingPage +=(args) => { };
             if (template.ColorModel is ColorModel color) service.PrintOptions.ColorModel = color;
@@ -39,15 +41,15 @@ public static class EndPoints
             return Results.Ok();
         });
 
-        // POST {{HostAddress}}/print/inbase64?printer=&color=&renderFormFill=
+        // POST {{HostAddress}}/api/print/inbase64?printer=&color=&renderFormFill=
         // Content-Type: text
         // Content: Base64 text
-        app.MapPost("print/inbase64", static async ([AsParameters] PrintTemplate template, HttpContext context) =>
+        routes.MapPost("api/print/base64", static async ([AsParameters] PrintFromTemplate template, HttpContext context) =>
         {
             byte[] buffer = await Base64.ConvertFromBase64StreamAsync(context.Request.BodyReader);
 
             using var document = new PdfDocument(buffer);
-            PrintingService service = new(document);
+            PrintService service = new(document);
 
             if (template.ColorModel is ColorModel color) service.PrintOptions.ColorModel = color;
             if (template.RenderFormFill is bool formFill) service.PrintOptions.RenderFormFill = formFill;
@@ -56,7 +58,7 @@ public static class EndPoints
         });
     }
 
-    public class PrintTemplate
+    public class PrintFromTemplate
     {
         public required string Printer { get; init; }
         public ColorModel? ColorModel { get; init; }

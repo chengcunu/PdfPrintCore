@@ -38,6 +38,7 @@ app.Run(url);
 
 [JsonSerializable(typeof(List<string>))]
 [JsonSerializable(typeof(Printer))]
+[JsonSerializable(typeof(List<Printer>))]
 [JsonSerializable(typeof(PrintOptions))]
-[JsonSerializable(typeof(PrintTemplate))]
+[JsonSerializable(typeof(PrintFromTemplate))]
 internal partial class DefaultJsonSerializerContext : JsonSerializerContext { }

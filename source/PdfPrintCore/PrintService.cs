@@ -9,16 +9,16 @@ namespace PdfPrintCore;
 /// <summary>
 /// Defines a reusable object that sends output to the printer.
 /// </summary>
-public class PrintingService
+public class PrintService
 {
     private readonly PdfDocument _document;
     private PrintOptions? _printOptions;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref='PrintingService'/> class.
+    /// Initializes a new instance of the <see cref='PrintService'/> class.
     /// </summary>
     /// <param name="document">The pdf document of printing.</param>
-    public PrintingService(PdfDocument document)
+    public PrintService(PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
         _document = document;
@@ -36,7 +36,7 @@ public class PrintingService
     /// <summary>
     /// Occurs when a page is printed.
     /// </summary>
-    public event DrawingPageEventHandle? OnDrawingPage;
+    public event DrawingPageEventHandler? OnDrawingPage;
 
     /// <summary>
     /// Print document
@@ -44,8 +44,8 @@ public class PrintingService
     /// <param name="printer">Printer name</param>
     public void Print(string? printer)
     {
-        nint zero = nint.Zero;
-        PRINT_OPTIONS options = ConvertPrintOptions(ref zero);
+        nint pCancelled = nint.Zero;
+        PRINT_OPTIONS options = GetPrintOptions(ref pCancelled);
         NativeMethods.Print(printer, _document.Data, _document.Password, options);
     }
 
@@ -60,10 +60,9 @@ public class PrintingService
         return Task.Run(() =>
         {
             nint pCancelled = Marshal.AllocHGlobal(sizeof(int));
-
             try
             {
-                PRINT_OPTIONS options = ConvertPrintOptions(ref pCancelled);
+                PRINT_OPTIONS options = GetPrintOptions(ref pCancelled);
                 using var ctr = cancellationToken.Register(() =>
                 {
                     Marshal.WriteInt32(pCancelled, 1);
@@ -79,10 +78,9 @@ public class PrintingService
         }, cancellationToken);
     }
 
-    internal PRINT_OPTIONS ConvertPrintOptions(ref nint pCancelled)
+    internal PRINT_OPTIONS GetPrintOptions(ref nint pCancelled)
     {
         RenderFlag flags = RenderFlag.NONE;
-
         if (PrintOptions.FitToPaper) flags |= RenderFlag.FIT_TO_PAPER;
         if (PrintOptions.RenderFormFill) flags |= RenderFlag.RENDER_FORMFILL;
         if (PrintOptions.PrintToFile) flags |= RenderFlag.PRINT_TO_FILE;

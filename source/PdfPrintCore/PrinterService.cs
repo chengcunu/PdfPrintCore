@@ -26,7 +26,8 @@ public class PrinterService
     public static List<Printer> ListPrinters()
     {
         var result = NativeMethods.ListPrinters();
-        return result.Select(x => ConvertPrinter(x)).ToList();
+        return result.Select(x => ConvertPrinter(x))
+            .ToList();
     }
 
     /// <summary>

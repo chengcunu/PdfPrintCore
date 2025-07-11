@@ -25,10 +25,4 @@
     <ProjectReference Include="..\PdfPrintCore\PdfPrintCore.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="PdfPrintCore.license.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

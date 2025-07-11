@@ -15,7 +15,6 @@ public class License
     public static bool Load(string filename)
     {
         ArgumentNullException.ThrowIfNull(filename);
-
         if (!File.Exists(filename))
             throw new FileNotFoundException(filename);
 
